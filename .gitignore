@@ -1,0 +1,8 @@
+# VS Code Go debug binaries and cache
+.debug/
+__debug_bin*
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+.vscode/**/.history/

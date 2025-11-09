@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Build an Oracle CRUD API in Go - Training Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .slide {
+            background: white;
+            border-radius: 15px;
+            padding: 60px;
+            margin: 40px 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            min-height: 500px;
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            border-bottom: 4px solid #667eea;
+            padding-bottom: 15px;
+        }
+
+        h2 {
+            color: #764ba2;
+            font-size: 2em;
+            margin: 30px 0 20px 0;
+            padding-left: 15px;
+            border-left: 5px solid #764ba2;
+        }
+
+        h3 {
+            color: #667eea;
+            font-size: 1.5em;
+            margin: 25px 0 15px 0;
+        }
+
+        p, li {
+            line-height: 1.8;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        ul, ol {
+            margin-left: 30px;
+            margin-bottom: 20px;
+        }
+
+        ul li {
+            list-style-type: none;
+            position: relative;
+            padding-left: 25px;
+        }
+
+        ul li:before {
+            content: "▸";
+            color: #667eea;
+            font-weight: bold;
+            position: absolute;
+            left: 0;
+        }
+
+        ol {
+            counter-reset: item;
+        }
+
+        ol li {
+            counter-increment: item;
+            margin-bottom: 15px;
+        }
+
+        code {
+            background: #f4f4f4;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            padding: 2px 8px;
+            font-family: 'Courier New', monospace;
+            color: #c7254e;
+            font-size: 0.95em;
+        }
+
+        pre {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            border-radius: 8px;
+            padding: 20px;
+            overflow-x: auto;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            line-height: 1.5;
+        }
+
+        pre code {
+            background: none;
+            border: none;
+            color: #f8f8f2;
+            padding: 0;
+        }
+
+        .highlight {
+            background: #fff3cd;
+            padding: 20px;
+            border-left: 5px solid #ffc107;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+
+        .success {
+            background: #d4edda;
+            border-left-color: #28a745;
+        }
+
+        .info {
+            background: #d1ecf1;
+            border-left-color: #17a2b8;
+        }
+
+        .warning {
+            background: #fff3cd;
+            border-left-color: #ffc107;
+        }
+
+        .title-slide {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            min-height: 600px;
+        }
+
+        .title-slide h1 {
+            font-size: 3.5em;
+            border: none;
+            margin-bottom: 30px;
+        }
+
+        .title-slide p {
+            font-size: 1.3em;
+            color: #666;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin: 20px 0;
+        }
+
+        .card {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .card h3 {
+            margin-top: 0;
+            color: #764ba2;
+        }
+
+        .step-number {
+            display: inline-block;
+            background: #667eea;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            margin-right: 15px;
+            font-size: 1.2em;
+        }
+
+        .steps li {
+            display: flex;
+            align-items: flex-start;
+            margin-bottom: 25px;
+            padding-left: 0;
+        }
+
+        .steps li:before {
+            display: none;
+        }
+
+        .steps-content {
+            flex: 1;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th, td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background: #667eea;
+            color: white;
+            font-weight: bold;
+        }
+
+        tr:hover {
+            background: #f5f5f5;
+        }
+
+        .footer {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .slide {
+                padding: 30px;
+            }
+
+            h1 {
+                font-size: 2em;
+            }
+
+            h2 {
+                font-size: 1.5em;
+            }
+
+            .grid-2 {
+                grid-template-columns: 1fr;
+            }
+
+            .title-slide h1 {
+                font-size: 2.5em;
+            }
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .slide {
+                page-break-after: always;
+                box-shadow: none;
+                border: 1px solid #ddd;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Title Slide -->
+        <div class="slide title-slide">
+            <h1>Build an Oracle CRUD API in Go</h1>
+            <p>A Hands-On Training Guide for Junior Developers</p>
+            <p style="margin-top: 20px; font-size: 1em; color: #999;">Using godror, OpenAPI, and Best Practices</p>
+        </div>
+
+        <!-- Learning Objectives -->
+        <div class="slide">
+            <h2>Learning Objectives</h2>
+            <ul>
+                <li>Use <code>godror</code> to connect Go apps to Oracle DB</li>
+                <li>Structure a small service (db, repo, api) using packages</li>
+                <li>Serve OpenAPI docs and use Postman for testing</li>
+                <li>Configure a connection pool and avoid Oracle OCI pitfalls</li>
+                <li>Hot-reload SQL queries from a properties file without restarting</li>
+            </ul>
+        </div>
+
+        <!-- Prerequisites -->
+        <div class="slide">
+            <h2>Prerequisites</h2>
+
+            <h3>Required Software</h3>
+            <ul>
+                <li>Go 1.23+ (check with <code>go version</code>)</li>
+                <li>Git and VS Code (or your editor of choice)</li>
+            </ul>
+
+            <h3>Oracle Database Access</h3>
+            <p>Choose one option:</p>
+            <ul>
+                <li>Local Oracle XE (Docker or native install), or</li>
+                <li>Remote Oracle instance you can reach (host/port/service)</li>
+            </ul>
+
+            <h3>Oracle Client Setup for godror</h3>
+            <p>Choose one option:</p>
+            <ul>
+                <li><strong>Native:</strong> Install Oracle Instant Client (Basic). Add its <code>bin</code> to PATH (Win) / <code>LD_LIBRARY_PATH</code> (Linux) / <code>DYLD_LIBRARY_PATH</code> (macOS)</li>
+                <li><strong>Thin mode:</strong> Consult <code>godror</code> docs to enable driver thin mode (if supported)</li>
+            </ul>
+        </div>
+
+        <!-- Path A: Overview -->
+        <div class="slide">
+            <h2>Two Learning Paths</h2>
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Path A: Run This Project</h3>
+                    <p>Clone the existing repository and run it on your machine. Great for understanding the complete system quickly.</p>
+                    <p style="margin-top: 15px;"><strong>Best for:</strong> Quick start, understanding architecture</p>
+                </div>
+                <div class="card">
+                    <h3>Path B: Build From Scratch</h3>
+                    <p>Create the entire project step-by-step from an empty directory. Deep learning through hands-on coding.</p>
+                    <p style="margin-top: 15px;"><strong>Best for:</strong> Deep understanding, practice</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Path A: Steps -->
+        <div class="slide">
+            <h2>Path A: Run This Project</h2>
+
+            <ol class="steps">
+                <li>
+                    <span class="step-number">1</span>
+                    <div class="steps-content">
+                        <h3>Clone and Open</h3>
+                        <pre><code>git clone &lt;your-repo-url&gt; && cd godror-crud</code></pre>
+                        <p>Open in VS Code</p>
+                    </div>
+                </li>
+
+                <li>
+                    <span class="step-number">2</span>
+                    <div class="steps-content">
+                        <h3>Configure Database</h3>
+                        <p>Edit <code>config/application.properties</code> and set:</p>
+                        <ul>
+                            <li><code>db.service</code>, <code>db.username</code>, <code>db.password</code></li>
+                            <li><code>db.server</code>, <code>db.port</code>, <code>db.timezone</code></li>
+                        </ul>
+                        <p style="margin-top: 15px;"><strong>Optional pool tuning (recommended):</strong></p>
+                        <ul>
+                            <li><code>db.pool.max_open = 20</code></li>
+                            <li><code>db.pool.max_idle = 10</code></li>
+                            <li><code>db.pool.conn_max_lifetime = 30m</code></li>
+                            <li><code>db.pool.conn_max_idletime = 5m</code></li>
+                        </ul>
+                    </div>
+                </li>
+
+                <li>
+                    <span class="step-number">3</span>
+                    <div class="steps-content">
+                        <h3>Create Database Objects</h3>
+                        <p>Run the DDL in README.md to create <code>PRODUCTS</code> table</p>
+                        <p>Optionally create a sequence and update <code>nextProductId</code> query</p>
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Path A: Steps Continued -->
+        <div class="slide">
+            <h2>Path A: Run & Test</h2>
+
+            <ol class="steps" start="4">
+                <li>
+                    <span class="step-number">4</span>
+                    <div class="steps-content">
+                        <h3>Build and Run</h3>
+                        <pre><code>go run .</code></pre>
+                        <p>Or use VS Code → Run and Debug → Launch API</p>
+                    </div>
+                </li>
+
+                <li>
+                    <span class="step-number">5</span>
+                    <div class="steps-content">
+                        <h3>Smoke Test</h3>
+                        <pre><code># Health check
+curl http://localhost:8080/health
+
+# List products
+curl http://localhost:8080/products
+
+# Create product
+curl -X POST http://localhost:8080/products \
+  -H "Content-Type: application/json" \
+  -d '{"name":"Widget"}'
+
+# API Documentation
+http://localhost:8080/docs/openapi.yaml</code></pre>
+                    </div>
+                </li>
+
+                <li>
+                    <span class="step-number">6</span>
+                    <div class="steps-content">
+                        <h3>Import to Postman</h3>
+                        <p>Import → Link → <code>http://localhost:8080/docs/openapi.yaml</code> → Generate Collection</p>
+                    </div>
+                </li>
+
+                <li>
+                    <span class="step-number">7</span>
+                    <div class="steps-content">
+                        <h3>Hot-Reload SQL</h3>
+                        <p>Edit <code>config/application.properties</code> queries (e.g., add <code>ORDER BY NAME</code>). Save.</p>
+                        <p>Re-call the endpoint; changes apply within ~2 seconds (no restart)</p>
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Path B: Overview -->
+        <div class="slide">
+            <h2>Path B: Recreate From Scratch</h2>
+
+            <ol class="steps">
+                <li>
+                    <span class="step-number">1</span>
+                    <div class="steps-content">
+                        <h3>Initialize Module</h3>
+                        <pre><code>mkdir oracle-crud && cd oracle-crud
+go mod init go-demo-crud
+go get github.com/godror/godror</code></pre>
+                    </div>
+                </li>
+
+                <li>
+                    <span class="step-number">2</span>
+                    <div class="steps-content">
+                        <h3>Create Folders</h3>
+                        <p>Create the following directory structure:</p>
+                        <ul>
+                            <li><code>internal/db</code></li>
+                            <li><code>internal/model</code></li>
+                            <li><code>internal/repo</code></li>
+                            <li><code>internal/api</code></li>
+                            <li><code>internal/docs</code></li>
+                            <li><code>internal/config</code></li>
+                            <li><code>config</code></li>
+                        </ul>
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Path B: Components -->
+        <div class="slide">
+            <h2>Path B: Implement Components</h2>
+
+            <ol class="steps" start="3">
+                <li>
+                    <span class="step-number">3</span>
+                    <div class="steps-content">
+                        <h3>Implement Core Components</h3>
+                        <ul>
+                            <li><strong>DB connection:</strong> <code>internal/db/config.go</code> with <code>Config{Service, Username, ...Timezone}</code> and <code>Open()</code> building a godror DSN</li>
+                            <li><strong>Domain model:</strong> <code>internal/model/product.go</code> with <code>Product</code> struct</li>
+                            <li><strong>Repository:</strong> <code>internal/repo/product_repo.go</code> with CRUD using <code>database/sql</code></li>
+                            <li><strong>HTTP:</strong> <code>internal/api/handlers.go</code> for <code>/health</code>, <code>/products</code>, <code>/products/{id}</code> handlers and route registration</li>
+                            <li><strong>Documentation:</strong> <code>internal/docs/openapi.yaml</code> (OpenAPI 3) and <code>internal/docs/serve.go</code> using embed to serve <code>/docs/openapi.yaml</code></li>
+                            <li><strong>Properties:</strong> <code>internal/config/properties.go</code> to poll+reload SQL queries from <code>config/application.properties</code> (every ~2s)</li>
+                            <li><strong>App config:</strong> <code>internal/config/app.go</code> to load DB settings from the same properties file</li>
+                            <li><strong>Main:</strong> <code>main.go</code> wires config → db → repo → api and starts server on <code>:8080</code></li>
+                        </ul>
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Path B: Final Steps -->
+        <div class="slide">
+            <h2>Path B: Configuration & Testing</h2>
+
+            <ol class="steps" start="4">
+                <li>
+                    <span class="step-number">4</span>
+                    <div class="steps-content">
+                        <h3>Add Config Files</h3>
+                        <p>Create <code>config/application.properties</code> with <code>db.*</code> keys and SQL statements</p>
+                    </div>
+                </li>
+
+                <li>
+                    <span class="step-number">5</span>
+                    <div class="steps-content">
+                        <h3>Run and Test</h3>
+                        <p>Use the same steps as Path A, sections 4–7</p>
+                    </div>
+                </li>
+            </ol>
+        </div>
+
+        <!-- Best Practices -->
+        <div class="slide">
+            <h2>Best Practices and Tips</h2>
+
+            <div class="highlight info">
+                <h3>Connection Pooling</h3>
+                <p>Keep <code>db.pool.max_idle > 0</code> to avoid OCI reconnect churn. Consider driver session pooling by setting DSN params: <code>standaloneConnection=0 poolMinSessions=1</code></p>
+            </div>
+
+            <div class="highlight warning">
+                <h3>Timezone Configuration</h3>
+                <p>Set DSN <code>timezone</code> to match DB <code>SYSTIMESTAMP</code> (often <code>+00:00</code>) to avoid warnings and timestamp confusion</p>
+            </div>
+
+            <div class="highlight success">
+                <h3>Error Handling</h3>
+                <p>Check logs for config reload issues; the app keeps last good SQL on parse failures</p>
+            </div>
+
+            <div class="highlight info">
+                <h3>BLOB/JSON Handling</h3>
+                <p>For <code>attributes_blob</code>, send base64; for large text, prefer CLOB</p>
+            </div>
+        </div>
+
+        <!-- Exercises -->
+        <div class="slide">
+            <h2>Practice Exercises</h2>
+
+            <div class="grid-2">
+                <div class="card">
+                    <h3>Exercise 1: Sequence Generation</h3>
+                    <p>Replace MAX+1 ID generation with a sequence; update queries via properties</p>
+                </div>
+
+                <div class="card">
+                    <h3>Exercise 2: Search Endpoint</h3>
+                    <p>Add a search endpoint (e.g., <code>/products?name=...</code>), including OpenAPI updates</p>
+                </div>
+
+                <div class="card">
+                    <h3>Exercise 3: Validation</h3>
+                    <p>Implement server-side validation for product name length</p>
+                </div>
+
+                <div class="card">
+                    <h3>Exercise 4: Middleware</h3>
+                    <p>Add basic middleware for request logging</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Troubleshooting -->
+        <div class="slide">
+            <h2>Troubleshooting</h2>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>Issue</th>
+                        <th>Solution</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Discrepancy between SESSIONTIMEZONE and SYSTIMESTAMP</td>
+                        <td>Set <code>timezone="+00:00"</code> (or your local zone) in the DSN</td>
+                    </tr>
+                    <tr>
+                        <td>OCI library load errors</td>
+                        <td>Verify Instant Client install and PATH/LD_LIBRARY_PATH</td>
+                    </tr>
+                    <tr>
+                        <td>Build status <code>0xc000013a</code> on Windows</td>
+                        <td>Usually indicates the process was interrupted (debugger stopped)</td>
+                    </tr>
+                    <tr>
+                        <td>Permission/auth errors</td>
+                        <td>Confirm Oracle credentials and network reachability</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Architecture Overview -->
+        <div class="slide">
+            <h2>Project Architecture</h2>
+
+            <div class="highlight">
+                <h3>Key Files in This Repository</h3>
+                <ul style="margin-top: 15px;">
+                    <li><code>main.go</code> — wiring and server startup</li>
+                    <li><code>internal/db/config.go</code> — DB config, DSN, pool application</li>
+                    <li><code>config/application.properties</code> — DB settings + SQL queries (hot-reloaded)</li>
+                    <li><code>internal/config/properties.go</code> — query reload manager</li>
+                    <li><code>internal/config/app.go</code> — load DB config from properties</li>
+                    <li><code>internal/repo/product_repo.go</code> — CRUD SQL</li>
+                    <li><code>internal/api/handlers.go</code> — HTTP handlers and routes</li>
+                    <li><code>internal/docs/openapi.yaml</code> — API schema (import into Postman)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Summary -->
+        <div class="slide">
+            <h2>Summary</h2>
+
+            <h3>What You've Learned</h3>
+            <ul>
+                <li>How to connect Go applications to Oracle Database using godror</li>
+                <li>Best practices for structuring a Go service with proper package organization</li>
+                <li>Connection pooling and configuration for production-ready applications</li>
+                <li>Hot-reloading configuration for development agility</li>
+                <li>API documentation using OpenAPI and integration with Postman</li>
+            </ul>
+
+            <h3 style="margin-top: 40px;">Next Steps</h3>
+            <ul>
+                <li>Complete the practice exercises</li>
+                <li>Extend the API with additional features</li>
+                <li>Explore advanced godror features</li>
+                <li>Implement authentication and authorization</li>
+                <li>Add comprehensive testing (unit and integration tests)</li>
+            </ul>
+        </div>
+
+        <!-- Thank You -->
+        <div class="slide title-slide">
+            <h1>Thank You!</h1>
+            <p style="margin-top: 30px;">Happy Coding!</p>
+            <p style="margin-top: 20px; font-size: 1em; color: #999;">Questions? Refer to the documentation in the repository</p>
+        </div>
+    </div>
+
+    <div class="footer">
+        <p>Build an Oracle CRUD API in Go - Training Presentation</p>
+        <p style="margin-top: 10px;">Generated from TRAINING.md</p>
+    </div>
+</body>
+</html>
